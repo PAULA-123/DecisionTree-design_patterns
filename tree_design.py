@@ -36,14 +36,14 @@ class Node(ABC):
 class DecisionNode(Node):
     def add_child(self, child: Node) -> None:
         self.children.append(child)
-        print(f"DecisionNode: nó filho {child} adicionado")
+        print(f"[DecisionNode]: nó filho {child} adicionado")
 
     def get_children(self):
         return self.children
 
     def accept(self, visitor)-> None:
         visitor.visit_decision_node(self)
-        print(f"DecisionNode: Visitor {visitor} aceito")
+        print(f"[DecisionNode]: Visitor {visitor} aceito")
 
 
 # nós folha (resultado final), herda de Node
@@ -55,11 +55,11 @@ class LeafNode(Node):
 
     # Nó folha não pode ter filhos, então levanta um erro
     def add_child(self, child: Node) -> None:
-        raise RuntimeError("LeafNode: Nós folhas não podem adicionar filhos!")
+        raise RuntimeError("[LeafNode]: Nós folhas não podem adicionar filhos!")
     
     def accept(self, visitor)-> None:
         visitor.visit_leaf_node(self)
-        print(f"LeafNode: Visitor {visitor} aceito")
+        print(f"[LeafNode]: Visitor {visitor} aceito")
 
     # Retorna lista vázia, já que não tem filhos
     def get_children(self)-> List[Node]:
@@ -81,7 +81,7 @@ class TreeBuilder():
 
     def transition_to(self, State: State): 
         # permite alterar o objeto de estado em tempo de execução
-        print(f"TreeBuilder: Transition to {State.__class__.__name__}")
+        print(f"[TreeBuilder]: Transition to {State.__class__.__name__}")
         self._state = State
         self._state.tree = self
 
@@ -110,22 +110,22 @@ class State(ABC):
 
 
 class SplittingState(State):
-    """fase de divisão: cria decision nodes"""
+    """Estado de divisão: cria nós de decisão"""
     
     def handle(self)-> None:
-        print(f"SplittingState: Dividindo o nó... criando DecisionNode")
+        print(f"[SplittingState]: Dividindo o nó... criando DecisionNode")
         self.tree.transition_to(StoppingState())
 
 class StoppingState(State):
-    """fase de parada: cria leaf nodes"""
+    """Estado de parada: cria nós folha"""
     def  handle(self)-> None:
-        print("StoppingState: Parando divisão. Criando LeafNode.")
+        print("[StoppingState]: Parando divisão. Criando LeafNode.")
         self.tree.transition_to(PruningState())
 
 class PruningState(State):
-    """fase de poda: remove ou reduz nós"""
+    """Estado de poda: remove ou reduz nós"""
     def handle(self):
-        print("PruningState: Podando a árvore...")
+        print("[PruningState]: Podando a árvore...")
         self.tree.transition_to(SplittingState())
 
 
@@ -134,8 +134,69 @@ class PruningState(State):
 
 # Iterator: Um iterador próprio, como PreOrderIterator ou BFSIterator. 
 
+class DecisionTree:
+    """Define a estrutura da coleção, a árvore de decisão"""
+    def __init__(self, root: Node):
+        self.root = root
 
+    def __iter__(self):
+        return PreOrderIterator(self.root) # Passa a raiz da árvore (coleção)
 
+    def iter_pre_order(self):
+        return PreOrderIterator(self.root)
+
+    def iter_bfs(self):
+        return  BFSIterator(self.root)
+    
+class PreOrderIterator:
+    """Percorre a árvore em pré-ordem (raiz depois filhos) usando uma pilha."""
+
+    def __init__(self, root: Node):
+        print("Criando PreOrderIterator...")
+        self.stack = [root]  # começa pela raiz
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.stack:
+            raise StopIteration
+
+        # pega o topo da pilha
+        node = self.stack.pop()
+
+        print(f"[PreOrderIterator] Visitando nó: {node}")
+
+        # adiciona os filhos na pilha (em ordem inversa)
+        # para que o primeiro filho seja visitado primeiro
+        for child in reversed(node.get_children()):
+            self.stack.append(child)
+
+        return node
+
+class BFSIterator:
+    """Percorre a árvore em largura (BFS) usando uma fila."""
+
+    def __init__(self, root: Node):
+        print("Criando BFSIterator...")
+        self.queue = [root]  # fila começa pela raiz
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.queue:
+            raise StopIteration
+
+        node = self.queue.pop(0)
+
+        print(f"[Iterator-BFS] Visitando nó: {node}")
+
+        # adiciona os filhos ao final da fila
+        for child in node.get_children():
+            self.queue.append(child)
+
+        return node
 ################################ VISITOR ##################################################
 
 # Visitor: Pelo menos dois visitantes independentes, por exemplo: DepthVisitor,  CountLeavesVisitor.
