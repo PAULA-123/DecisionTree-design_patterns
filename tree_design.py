@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 from __future__ import annotations
+from abc import ABC, abstractmethod
 from typing import List
 
 
@@ -74,16 +74,16 @@ class LeafNode(Node):
 class TreeBuilder():
     """Contexto do padrão State. Classe que armazena uma referência a um dos objetos concretos de estado e delega a eles todos os trabalhos específicos de estado."""
 
-    _state = None # Define o estado atual da árvore
+    # _state = None # Define o estado atual da árvore
 
     def __init__(self, State: State)-> None:
         self.transition_to(State)
 
     def transition_to(self, State: State): 
         # permite alterar o objeto de estado em tempo de execução
-        print(f"TreeBuilder: Transition to {State}")
+        print(f"TreeBuilder: Transition to {State.__class__.__name__}")
         self._state = State
-        self._state.context = self
+        self._state.tree = self
 
     def build_step(self): 
         # Método que delega o  comportamento para o estado
@@ -95,13 +95,14 @@ class TreeBuilder():
 
 class State(ABC):
     """Classe abstrata que define o que todo State deve conter. Também fornece uma referência reversa à árvore do estado anterior"""
+
     @property
     def tree(self) -> TreeBuilder:
-        return self._tree
+        return self._tree 
 
-    @property.setter
+    @tree.setter
     def tree(self, tree: TreeBuilder) -> None:
-        self._tree = tree
+        self._tree = tree  
 
     @abstractmethod
     def handle(self) -> None:
