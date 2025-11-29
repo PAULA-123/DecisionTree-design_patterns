@@ -197,6 +197,54 @@ class BFSIterator:
             self.queue.append(child)
 
         return node
+    
+
+
+
 ################################ VISITOR ##################################################
 
 # Visitor: Pelo menos dois visitantes independentes, por exemplo: DepthVisitor,  CountLeavesVisitor.
+
+class Visitor(ABC):
+    """Classe abstrata que define um conjunto de métodos visitantes"""
+    @abstractmethod
+    def visit_leaf_node(self, leaf_node: LeafNode):
+        pass
+
+    @abstractmethod
+    def visit_decision_node(self, decision_node: DecisionNode):
+        pass
+
+
+class DepthVisitor(Visitor):
+    """Visitor que calcula a  profundidade da árvore. Herda de visitor"""
+    def __init__(self):
+        self.depth = 0
+
+    def visit_decision_node(self, decision_node: DecisionNode):
+        self.depth += 1  
+        print(f"[DepthVisitor] Visitando DecisionNode: aumento de profundidade. Profundidade atual: {self.depth}")
+
+    def visit_leaf_node(self, leaf_node: LeafNode):
+        print(f"[DepthVisitor] Visitando LeafNode: profundidade final alcançada igual {self.depth})")
+
+
+class CountLeavesVisitor(Visitor):
+    """Visitor que conta o número de folhas da árvore. Herdade visitor"""
+    def __init__(self):
+        self.leaves = 0
+
+    def visit_leaf_node(self, leaf_node: LeafNode):
+        if leaf_node.is_leaf():
+            self.leaves+=1
+            print(f"[CountLeavesVisitor]Visitando LeafNode: folha encontrada. Total de folhas até o momento: {self.leaves}")
+
+    def visit_decision_node(self, decision_node: DecisionNode):
+        print(f"[CountLeavesVisitor] Visitando DecisionNode: Não é nó folha.")
+
+
+
+
+    
+    
+    
