@@ -257,7 +257,7 @@ class DepthVisitor(Visitor):
         print(f"[DepthVisitor] Visitando DecisionNode: aumento de profundidade. Profundidade atual: {self.depth}")
 
     def visit_leaf_node(self, leaf_node: LeafNode):
-        print(f"[DepthVisitor] Visitando LeafNode: profundidade final alcançada igual {self.depth})")
+        print(f"[DepthVisitor] Visitando LeafNode: profundidade final alcançada igual {self.depth}")
 
 
 class CountLeavesVisitor(Visitor):
