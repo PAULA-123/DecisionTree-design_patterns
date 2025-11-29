@@ -36,14 +36,14 @@ class Node(ABC):
 class DecisionNode(Node):
     def add_child(self, child: Node) -> None:
         self.children.append(child)
-        print(f"[DecisionNode]: nó filho {child} adicionado")
+        print(f"[DecisionNode]: nó filho {type(child).__name__} adicionado")
 
     def get_children(self):
         return self.children
 
     def accept(self, visitor)-> None:
         visitor.visit_decision_node(self)
-        print(f"[DecisionNode]: Visitor {visitor} aceito")
+        print(f"[DecisionNode]: Visitor {type(visitor).__name__} aceito")
 
 
 # nós folha (resultado final), herda de Node
@@ -59,7 +59,7 @@ class LeafNode(Node):
     
     def accept(self, visitor)-> None:
         visitor.visit_leaf_node(self)
-        print(f"[LeafNode]: Visitor {visitor} aceito")
+        print(f"[LeafNode]: Visitor {type(visitor).__name__} aceito")
 
     # Retorna lista vázia, já que não tem filhos
     def get_children(self)-> List[Node]:
@@ -72,11 +72,16 @@ class LeafNode(Node):
 
 
 class TreeBuilder():
-    """Contexto do padrão State. Classe que armazena uma referência a um dos objetos concretos de estado e delega a eles todos os trabalhos específicos de estado."""
+    """Contexto do padrão State. Classe que armazena uma referência a um dos objetos concretos de estado e delega a eles todos os trabalhos específicos de estado.
+    
+    Usa como interface da estrutura da árvore a classe DecisionTree, usada como coleção do iterador"""
 
     # _state = None # Define o estado atual da árvore
 
     def __init__(self, State: State)-> None:
+        # cria uma raiz vazia inicial
+        self.root = DecisionNode()
+        self.current_node = self.root
         self.transition_to(State)
 
     def transition_to(self, State: State): 
@@ -89,7 +94,8 @@ class TreeBuilder():
         # Método que delega o  comportamento para o estado
         self._state.handle()
 
-
+    def get_tree(self) -> DecisionTree:
+        return DecisionTree(self.root)
 
 
 
@@ -113,19 +119,44 @@ class SplittingState(State):
     """Estado de divisão: cria nós de decisão"""
     
     def handle(self)-> None:
-        print(f"[SplittingState]: Dividindo o nó... criando DecisionNode")
+        parent = self.tree.current_node
+        print(f"[SplittingState]: Dividindo o nó... criando dois DecisionNodes")
+
+        # cria dois nós internos
+        left = DecisionNode()
+        right = DecisionNode()
+
+        parent.add_child(left)
+        parent.add_child(right)
+
+        # move o ponteiro para o primeiro filho para continuar o processo
+        self.tree.current_node = left
+
+        # muda de estado
         self.tree.transition_to(StoppingState())
 
 class StoppingState(State):
-    """Estado de parada: cria nós folha"""
+    """Estado de parada: Converte o nó atual em folha e move ponteiro para o pai"""
     def  handle(self)-> None:
-        print("[StoppingState]: Parando divisão. Criando LeafNode.")
+        node = self.tree.current_node
+        print("[StoppingState]:  Convertendo nó {node} em LeafNode")
+
+        # transformar nó atual em folha
+        leaf = LeafNode()
+
         self.tree.transition_to(PruningState())
 
 class PruningState(State):
-    """Estado de poda: remove ou reduz nós"""
+    """Estado de poda: rRemove o último filho do nó atual"""
     def handle(self):
-        print("[PruningState]: Podando a árvore...")
+        node = self.tree.current_node
+        if node.children:
+            removed = node.children.pop()
+            print(f"[PruningState] Podando nó {removed} do pai {node}")
+        else:
+            print("[PruningState] Nada para podar nesse nó")
+
+        # volta para SplittingState
         self.tree.transition_to(SplittingState())
 
 
@@ -165,7 +196,7 @@ class PreOrderIterator:
         # pega o topo da pilha
         node = self.stack.pop()
 
-        print(f"[PreOrderIterator] Visitando nó: {node}")
+        print(f"[PreOrderIterator] Visitando nó: {type(node).__name__}")
 
         # adiciona os filhos na pilha (em ordem inversa)
         # para que o primeiro filho seja visitado primeiro
@@ -190,7 +221,7 @@ class BFSIterator:
 
         node = self.queue.pop(0)
 
-        print(f"[Iterator-BFS] Visitando nó: {node}")
+        print(f"[Iterator-BFS] Visitando nó: {type(node).__name__}")
 
         # adiciona os filhos ao final da fila
         for child in node.get_children():
