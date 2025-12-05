@@ -72,7 +72,8 @@ class LeafNode(Node):
 
 
 class TreeBuilder():
-    """Contexto do padrão State. Classe que armazena uma referência a um dos objetos concretos de estado e delega a eles todos os trabalhos específicos de estado.
+    """Contexto do padrão State. 
+    Classe que armazena uma referência a um dos objetos concretos de estado e delega a eles todos os trabalhos específicos de estado.
     
     Usa como interface da estrutura da árvore a classe DecisionTree, usada como coleção do iterador"""
 
@@ -85,7 +86,7 @@ class TreeBuilder():
         self.transition_to(State)
 
     def transition_to(self, State: State): 
-        # permite alterar o objeto de estado em tempo de execução
+        # Para alterar o objeto de estado em tempo de execução
         print(f"[TreeBuilder]: Transition to {State.__class__.__name__}")
         self._state = State
         self._state.tree = self
@@ -100,7 +101,7 @@ class TreeBuilder():
 
 
 class State(ABC):
-    """Classe abstrata que define o que todo State deve conter. Também fornece uma referência reversa à árvore do estado anterior"""
+    """Classe abstrata que define o que todo State deve conter."""
 
     @property
     def tree(self) -> TreeBuilder:

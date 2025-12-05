@@ -5,7 +5,7 @@ from tree_design import (
 )
 
 
-############################## CONSTRUÇÃO MANUAL DA ÁRVORE  (COMPOSITE) ##########################################
+############################## CONSTRUÇÃO DA ÁRVORE  (COMPOSITE) ##########################################
 
 print("\n======================  Testando Composite =====================")
 
@@ -72,7 +72,7 @@ builder.build_step()   # splitting to stopping
 builder.build_step()   # stopping to pruning
 builder.build_step()   # pruning to splitting
 
-# obtém a árvore construída pelo TreeBuilder
+# árvore construída pelo TreeBuilder
 generated_tree = builder.get_tree()
 
 print("\n--- Percorrendo árvore gerada pela máquina de estados (BFS) ---")
